@@ -2,23 +2,23 @@
 
 ![Music Visualizer](docs/main-screen.png)
 
-> **ONLY FOR SPOTIFY!!!**
+> **ONLY FOR SPOTIFY!!! WORKS ONLY IN CHROME!!!**
 
-A fullscreen music visualization web application designed for displaying Spotify playback on a projector or large screen.
+A fullscreen music visualization web application for displaying Spotify playback on a projector or large screen.
 
-Spotify remains responsible for playing and switching music. Music Visualizer only reads the current playback information and creates the visual presentation.
+Spotify handles music playback. Music Visualizer reads the current track information and creates the visual presentation.
 
 ## Features
 
-- Spotify account authorization via PKCE
-- Current song title, artists and album
+- Spotify authorization via PKCE
+- Track title, artists and album
 - Album artwork and blurred rotating background
 - Playback progress synchronization
 - Animated visualizer bars
 - Synchronized lyrics via LRCLIB
-- Cover-only mode when synchronized lyrics are unavailable
+- Cover-only mode when lyrics are unavailable
 - Smooth track transitions
-- Sidebar with visualizer controls
+- Sidebar controls
 
 ## How It Works
 
@@ -35,7 +35,7 @@ Music Visualizer
    └── Synchronized lyrics
 ```
 
-The application does **not** receive or process Spotify's audio stream.
+The application does **not** receive or process the Spotify audio stream.
 
 ## Project Structure
 
@@ -51,10 +51,10 @@ music-visualizer/
 ```
 
 - `index.html` — application structure
-- `style.css` — layout, visual design and animations
-- `app.js` — visualizer logic and UI updates
-- `spotify.js` — Spotify authentication and Web API
-- `lyrics.js` — LRCLIB requests and LRC parsing
+- `style.css` — layout and visual design
+- `app.js` — visualizer logic
+- `spotify.js` — Spotify API and authentication
+- `lyrics.js` — LRCLIB and LRC parsing
 
 ## Requirements
 
@@ -62,50 +62,142 @@ music-visualizer/
 - Spotify Developer application
 - Visual Studio Code
 - Live Server extension
-- Modern web browser
+- **Google Chrome**
+
+> The application is currently designed and tested for **Google Chrome**.
 
 Python and a backend server are **not required**.
 
 ## Spotify Setup
 
-Create an application in the Spotify Developer Dashboard.
+### 1. Create a Spotify application
 
-Set the Redirect URI to:
+Open the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
+
+Click **Create app** and fill in:
+
+**App Name**
+```text
+Music Visualizer
+```
+
+**App Description**
+```text
+A visual music experience that displays Spotify playback information and synchronized lyrics.
+```
+
+**Website**
+
+Leave empty.
+
+**Redirect URI**
+```text
+http://127.0.0.1:5500
+```
+
+Select **Web API** if requested and accept the Developer Terms.
+
+Click **Create**.
+
+### 2. Configure Redirect URI
+
+Open the application settings and find **Redirect URIs**.
+
+Add:
 
 ```text
 http://127.0.0.1:5500
 ```
 
-This must exactly match the address used by Live Server.
+Save the settings.
 
-Then open `spotify.js` and replace:
+The Redirect URI must exactly match the address used by Live Server.
+
+### 3. Add the Client ID
+
+In the Spotify application settings, copy the **Client ID**.
+
+Open:
+
+```text
+spotify.js
+```
+
+Find:
 
 ```js
 clientId: "YOUR_CLIENT_ID",
+redirectUri: "http://127.0.0.1:5500",
 ```
 
-with the Client ID from your Spotify Developer application.
+Replace `YOUR_CLIENT_ID` with your Client ID:
 
-The Client ID is **not** the Redirect URI.
+```js
+clientId: "1234567890abcdef1234567890abcdef",
+redirectUri: "http://127.0.0.1:5500",
+```
+
+The **Client ID** and **Redirect URI** are different values.
+
+### 4. Client Secret
+
+Do **not** add the Client Secret to the project.
+
+The application uses **Authorization Code with PKCE**, so the Client Secret is not required.
+
+Never upload a Client Secret to GitHub.
 
 ## Running
 
-1. Open the project in VS Code.
-2. Open `index.html` with **Live Server**.
-3. Open the application in the browser.
-4. Click **Connect Spotify**.
-5. Authorize the application.
-6. Start playing music in Spotify.
+### 1. Open the project
 
-The visualizer will automatically update when the current track changes.
+Open the project folder in VS Code.
+
+### 2. Start Live Server
+
+Open `index.html`, right-click it and select:
+
+```text
+Open with Live Server
+```
+
+Chrome should open:
+
+```text
+http://127.0.0.1:5500
+```
+
+### 3. Connect Spotify
+
+Move the cursor to the **left edge of the screen**.  
+The hidden sidebar will appear. Then click:
+
+```text
+Connect Spotify
+```
+
+Log in to Spotify and authorize the application.
+
+### 4. Start playing music
+
+Play a song in Spotify.
+
+Music Visualizer will automatically display:
+
+- song title
+- artist
+- album
+- album artwork
+- playback progress
+- synchronized lyrics when available
+
+Changing the song in Spotify automatically updates the visualizer.
 
 ## Lyrics
 
 Synchronized lyrics are loaded from **LRCLIB**.
 
-Only synchronized lyrics are used. If they are unavailable, the application switches to the cover-only display mode.
-
-The lyrics are synchronized using Spotify playback progress.
+Only synchronized lyrics are used. If they are unavailable, the visualizer switches to **cover-only mode**.
 
 ## Important Notes
 
@@ -117,8 +209,6 @@ The project is currently intended for local use with VS Code Live Server.
 
 ## Future Development
 
-Possible future improvements:
-
 - More visual themes
 - Improved lyric synchronization
 - Additional visual effects
@@ -127,4 +217,4 @@ Possible future improvements:
 
 ## License
 
-This project is intended for personal and educational use.
+This project is intended for personal and educational use
