@@ -25,6 +25,9 @@ const logoutButton = document.getElementById("spotify-logout");
 const fullscreenButton = document.getElementById("fullscreen-button");
 const displayModeButton = document.getElementById("display-mode-button");
 
+const videoBackgrounds = document.querySelectorAll(".video-background");
+const backgroundCards = document.querySelectorAll(".background-card");
+
 const barCount = 72;
 const barValues = Array.from({ length: barCount }, () => 0.15);
 
@@ -190,7 +193,6 @@ async function loadLyrics(track) {
     state.lyricIndex = 0;
     stopMissingLyricsCountdown();
     renderLyricsUnavailable();
-    setDisplayMode("lyrics");
 
     try {
         const syncedLyrics = await Lyrics.fetchSyncedLyrics(track);
@@ -207,7 +209,6 @@ async function loadLyrics(track) {
             return;
         }
 
-        setDisplayMode("lyrics");
         updateLyrics(true);
     } catch (error) {
         console.error("Lyrics:", error);
@@ -348,6 +349,55 @@ function animateBars() {
     updateLyrics();
     requestAnimationFrame(animateBars);
 }
+
+function setBackgroundStyle(style) {
+    if (style === "standard") {
+        visualizer.classList.remove("video-mode");
+
+        videoBackgrounds.forEach(video => {
+            video.classList.remove("active");
+            video.pause();
+        });
+    } else {
+        const video = document.querySelector(
+            `.video-background[data-video="${style.replace("video-", "")}"]`
+        );
+
+        if (!video) return;
+
+        visualizer.classList.add("video-mode");
+
+        videoBackgrounds.forEach(item => {
+            item.classList.remove("active");
+            item.pause();
+        });
+
+        video.currentTime = 0;
+        video.play().catch(error => {
+            console.error("Video background:", error);
+        });
+
+        video.classList.add("active");
+    }
+
+    backgroundCards.forEach(card => {
+        card.classList.toggle(
+            "active",
+            card.dataset.background === style
+        );
+    });
+}
+
+backgroundCards.forEach(card => {
+    card.addEventListener("click", () => {
+        setBackgroundStyle(card.dataset.background);
+    });
+});
+
+document.querySelectorAll(".background-card video").forEach(video => {
+    video.play().catch(() => { });
+});
+
 
 loginButton.hidden = true;
 logoutButton.hidden = true;

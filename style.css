@@ -57,6 +57,42 @@ button {
         rgba(0, 0, 0, 0.42);
 }
 
+/* VIDEO BACKGROUNDS */
+
+.video-backgrounds {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 500ms ease;
+}
+
+.video-background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 500ms ease;
+}
+
+.video-background.active {
+    opacity: 1;
+}
+
+.visualizer.video-mode .background {
+    opacity: 0;
+}
+
+.visualizer.video-mode .video-backgrounds {
+    opacity: 1;
+}
+
+/* ----- */
+
 .content {
     position: relative;
     display: grid;
@@ -109,6 +145,19 @@ button {
     height: 100%;
     object-fit: cover;
     border-radius: 14px;
+    animation: cover-breathe 6s ease infinite;
+}
+
+@keyframes cover-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.025);
+    }
 }
 
 .track-info {
@@ -290,6 +339,10 @@ button {
     pointer-events: none;
 }
 
+.visualizer.video-mode .bars {
+    display: none;
+}
+
 .bar {
     flex: 1;
     min-width: 2px;
@@ -352,6 +405,83 @@ button {
     flex-direction: column;
     gap: 10px;
 }
+
+.background-section {
+    margin-top: 14px;
+}
+
+.background-section-title {
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.background-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.background-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: #111;
+    cursor: pointer;
+}
+
+.background-card video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.background-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.18);
+    transition: background 180ms ease;
+}
+
+.background-card:hover::after {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.background-card span {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    left: 8px;
+    z-index: 2;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+}
+
+.background-card.active {
+    border-color: #1db954;
+}
+
+.standard-preview {
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 30% 30%, #555, transparent 45%),
+        radial-gradient(circle at 70% 70%, #222, #080808);
+}
+
+/* ---- */
 
 .icon-button {
     display: inline-flex;
