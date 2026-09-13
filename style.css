@@ -73,6 +73,7 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     min-width: 0;
     height: 100%;
     padding-right: 0;
@@ -113,6 +114,7 @@ button {
 .track-info {
     width: 100%;
     min-width: 0;
+    text-align: center;
 }
 
 .visualizer.cover-only .track-info {
