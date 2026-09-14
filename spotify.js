@@ -1,5 +1,5 @@
 const Spotify = {
-    clientId: "7ed2e70312a24b7f9a66fd44e155bbd3",
+    clientId: "YOUR_CLIENT_ID",
     redirectUri: "http://127.0.0.1:5500",
     scopes: ["user-read-currently-playing"],
 

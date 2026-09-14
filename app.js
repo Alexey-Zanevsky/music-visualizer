@@ -7,6 +7,8 @@ const state = {
     lyricsTrackId: null,
     lyricsRequestId: 0,
     displayMode: "lyrics",
+    displayModeSource: "system",
+    autoCoverMode: false,
     missingLyricsCountdown: null,
     missingLyricsInterval: null
 };
@@ -24,6 +26,9 @@ const loginButton = document.getElementById("spotify-login");
 const logoutButton = document.getElementById("spotify-logout");
 const fullscreenButton = document.getElementById("fullscreen-button");
 const displayModeButton = document.getElementById("display-mode-button");
+const content = document.querySelector(".content");
+const welcomeScreen = document.getElementById("welcome-screen");
+const welcomeConnect = document.getElementById("welcome-connect");
 
 const videoBackgrounds = document.querySelectorAll(".video-background");
 const backgroundCards = document.querySelectorAll(".background-card");
@@ -40,6 +45,13 @@ for (let i = 0; i < barCount; i++) {
 function syncProgress(progressMs) {
     state.progress = Number(progressMs || 0) / 1000;
     state.progressSyncedAt = performance.now();
+}
+
+function updateSpotifyScreen() {
+    visualizer.classList.toggle(
+        "spotify-connected",
+        Spotify.isLoggedIn()
+    );
 }
 
 function getCurrentProgress() {
@@ -94,28 +106,49 @@ function renderLyricsUnavailable() {
 
 function renderLyricsWindow(lines, activeIndex) {
     stopMissingLyricsCountdown();
-    lyrics.innerHTML = "";
 
-    const windowElement = document.createElement("div");
-    windowElement.className = "lyrics-window";
+    let windowElement = lyrics.querySelector(".lyrics-window");
 
-    for (let index = activeIndex - 1; index <= activeIndex + 1; index++) {
-        const line = document.createElement("div");
-        line.className = "lyric-line";
+    if (!windowElement) {
+        lyrics.innerHTML = "";
 
-        if (index === activeIndex) {
-            line.classList.add("current");
-        }
+        windowElement = document.createElement("div");
+        windowElement.className = "lyrics-window";
 
-        line.textContent = lines[index]?.text || "";
-        windowElement.appendChild(line);
+        lines.forEach(lineData => {
+            const line = document.createElement("div");
+            line.className = "lyric-line";
+            line.textContent = lineData?.text || "";
+            windowElement.appendChild(line);
+        });
+
+        lyrics.appendChild(windowElement);
     }
 
-    lyrics.appendChild(windowElement);
+    const lineElements = Array.from(windowElement.children);
+
+    lineElements.forEach((line, index) => {
+        line.classList.toggle("current", index === activeIndex);
+    });
+
+    const lineHeight = lineElements[0]?.getBoundingClientRect().height || 0;
+
+    if (!lineHeight) {
+        return;
+    }
+
+    const lyricsCenter = lyrics.clientHeight / 2;
+    const activeLineCenter = (activeIndex + 0.5) * lineHeight;
+
+    const offset = lyricsCenter - activeLineCenter;
+
+    windowElement.style.transform = `translateY(${offset}px)`;
 }
 
-function setDisplayMode(mode, isManual = false) {
+function setDisplayMode(mode, source = "system") {
     state.displayMode = mode === "cover" ? "cover" : "lyrics";
+    state.displayModeSource = source;
+
     visualizer.classList.toggle("cover-only", state.displayMode === "cover");
 
     if (state.displayMode === "cover") {
@@ -123,21 +156,25 @@ function setDisplayMode(mode, isManual = false) {
     }
 
     displayModeButton.classList.toggle("is-active", state.displayMode === "cover");
+
     displayModeButton.setAttribute(
         "aria-label",
         state.displayMode === "cover" ? "Show lyrics mode" : "Show cover mode"
     );
 
-    const iconName = state.displayMode === "cover" ? "panel-right-open" : "panel-right-close";
-    const labelText = state.displayMode === "cover" ? "Cover mode" : "Lyrics mode";
-    displayModeButton.innerHTML = `<i data-lucide="${iconName}"></i><span>${labelText}</span>`;
+    const iconName = state.displayMode === "cover"
+        ? "image"
+        : "music-2";
+
+    const labelText = state.displayMode === "cover"
+        ? "Cover mode"
+        : "Lyrics mode";
+
+    displayModeButton.innerHTML =
+        `<i data-lucide="${iconName}"></i><span>${labelText}</span>`;
 
     if (window.lucide) {
         window.lucide.createIcons();
-    }
-
-    if (isManual && state.displayMode === "lyrics" && !state.lyrics.length) {
-        startMissingLyricsCountdown();
     }
 }
 
@@ -151,37 +188,34 @@ function stopMissingLyricsCountdown() {
 }
 
 function updateMissingLyricsCountdown(secondsLeft) {
-    const timer = lyrics.querySelector(".lyrics-countdown");
     const value = lyrics.querySelector(".lyrics-countdown-value");
-    const elapsed = 10 - secondsLeft;
-
-    if (timer) {
-        timer.style.setProperty("--countdown-progress", `${elapsed * 36}deg`);
-    }
-
-    if (value) {
+    if (value)
         value.textContent = String(secondsLeft);
-    }
 }
 
 function startMissingLyricsCountdown() {
     stopMissingLyricsCountdown();
 
-    if (state.displayMode === "cover") {
+    if (state.displayMode === "cover" || state.lyrics.length) {
         return;
     }
 
     state.missingLyricsCountdown = 10;
-    updateMissingLyricsCountdown(state.missingLyricsCountdown);
+    updateMissingLyricsCountdown(10);
 
     state.missingLyricsInterval = setInterval(() => {
         state.missingLyricsCountdown -= 1;
-        updateMissingLyricsCountdown(Math.max(1, state.missingLyricsCountdown));
 
         if (state.missingLyricsCountdown <= 0) {
             stopMissingLyricsCountdown();
-            setDisplayMode("cover");
+
+            state.autoCoverMode = true;
+            setDisplayMode("cover", "system");
+
+            return;
         }
+
+        updateMissingLyricsCountdown(state.missingLyricsCountdown);
     }, 1000);
 }
 
@@ -202,6 +236,15 @@ async function loadLyrics(track) {
         }
 
         state.lyrics = syncedLyrics;
+
+        if (
+            state.lyrics.length &&
+            state.autoCoverMode &&
+            state.displayModeSource === "system"
+        ) {
+            state.autoCoverMode = false;
+            setDisplayMode("lyrics", "system");
+        }
 
         if (!state.lyrics.length) {
             renderLyricsUnavailable();
@@ -247,20 +290,26 @@ function updateLyrics(forceRender = false) {
 
 function changeTrack(track) {
     visualizer.classList.add("changing");
-    transition.classList.add("active");
 
     setTimeout(() => {
         state.track = track;
         syncProgress(track.progress);
 
         renderTrack(track);
+
+        content.classList.remove("track-entering");
+
+        void content.offsetWidth;
+
+        content.classList.add("track-entering");
+
         loadLyrics(track);
 
         setTimeout(() => {
             visualizer.classList.remove("changing");
-            transition.classList.remove("active");
-        }, 80);
-    }, 300);
+            content.classList.remove("track-entering");
+        }, 450);
+    }, 450);
 }
 
 async function updateSpotify() {
@@ -288,11 +337,18 @@ async function initSpotify() {
         console.error("Spotify authorization:", error);
     }
 
+    updateSpotifyScreen();
+
     if (!Spotify.isLoggedIn()) {
         loginButton.hidden = false;
         logoutButton.hidden = true;
 
         loginButton.addEventListener("click", () => Spotify.login());
+
+        welcomeConnect.addEventListener("click", () => {
+            Spotify.login();
+        });
+
         return;
     }
 
@@ -301,6 +357,7 @@ async function initSpotify() {
 
     logoutButton.addEventListener("click", () => {
         Spotify.logout();
+        updateSpotifyScreen();
         location.reload();
     });
 
@@ -330,7 +387,16 @@ function updateFullscreenButton() {
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 
 displayModeButton.addEventListener("click", () => {
-    setDisplayMode(state.displayMode === "cover" ? "lyrics" : "cover", true);
+    const nextMode = state.displayMode === "cover" ? "lyrics" : "cover";
+
+    state.displayModeSource = "user";
+    state.autoCoverMode = false;
+
+    setDisplayMode(nextMode, "user");
+
+    if (nextMode === "lyrics" && !state.lyrics.length) {
+        startMissingLyricsCountdown();
+    }
 });
 
 function animateBars() {
@@ -394,6 +460,8 @@ backgroundCards.forEach(card => {
     });
 });
 
+setBackgroundStyle("standard");
+
 document.querySelectorAll(".background-card video").forEach(video => {
     video.play().catch(() => { });
 });
@@ -401,7 +469,6 @@ document.querySelectorAll(".background-card video").forEach(video => {
 
 loginButton.hidden = true;
 logoutButton.hidden = true;
-renderLyricsUnavailable();
 animateBars();
 initSpotify();
 updateFullscreenButton();

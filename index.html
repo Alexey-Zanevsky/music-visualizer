@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
     <title>Music Visualizer</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -42,6 +45,122 @@
             <video class="video-background" data-video="12" src="mp4/vid_12.mp4" muted loop playsinline></video>
         </div>
 
+        <!-- Welcome Screen -->
+        <section class="welcome-screen" id="welcome-screen">
+
+            <div class="welcome-content">
+
+                <div class="welcome-title">
+                    MUSIC VISUALIZER
+                </div>
+
+                <div class="welcome-subtitle">
+                    for Spotify
+                </div>
+
+                <p class="welcome-description">
+                    Connect your Spotify account to start the visualizer.
+                </p>
+
+                <div class="setup-steps">
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">01</span>
+                        <div>
+                            <strong>Create a Spotify App</strong>
+                            <p>
+                                Open the
+                                <a href="https://developer.spotify.com/dashboard/" target="_blank"
+                                    rel="noopener noreferrer">
+                                    Spotify Developer Dashboard
+                                </a>
+                                and click <b>Create app</b>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">02</span>
+                        <div>
+                            <strong>Enter app details</strong>
+                            <p>
+                                Set the name and description to <code>Music Visualizer App</code>
+                                and leave <b>Website</b> empty.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">03</span>
+                        <div>
+                            <strong>Add the Redirect URI</strong>
+                            <p>
+                                Add <code>http://127.0.0.1:5500</code> to <b>Redirect URIs</b>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">04</span>
+                        <div>
+                            <strong>Select Web API</strong>
+                            <p>
+                                Check <b>Web API</b> and agree to Spotify's
+                                <a href="https://developer.spotify.com/terms" target="_blank" rel="noopener noreferrer">
+                                    Developer Terms of Service
+                                </a>
+                                and
+                                <a href="https://developer.spotify.com/documentation/design" target="_blank"
+                                    rel="noopener noreferrer">
+                                    Design Guidelines
+                                </a>.
+                                Cick <b>Save</b> to create the app.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">05</span>
+                        <div>
+                            <strong>Add your Client ID</strong>
+                            <p>
+                                Copy the <b>Client ID</b> from your Spotify app and
+                                replace <code>YOUR_CLIENT_ID</code> in <code>spotify.js</code>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="setup-step">
+                        <span class="setup-step-number">06</span>
+                        <div>
+                            <strong>Connect Spotify</strong>
+                            <p>
+                                Start a song in Spotify, click the button below,
+                                then sign in and authorize the application.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="welcome-connect" id="welcome-connect" type="button">
+                    <img src="docs/Spotify.png" alt="" class="spotify-logo">
+                    <span>Connect Spotify</span>
+                </button>
+
+                <div class="welcome-note">
+                    Your Spotify account is used only to read playback information.
+                </div>
+
+                <div class="app-brand-note">
+                    This is an independent private project and is not affiliated with Spotify.
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Main content -->
         <section class="content">
 
             <div class="track-side">
@@ -67,10 +186,25 @@
         <div class="bars" id="bars" aria-hidden="true"></div>
         <div class="transition" id="transition"></div>
 
+        <!-- Sidebar -->
         <div class="sidebar-trigger"></div>
 
         <aside class="sidebar" aria-label="Visualizer controls">
             <div class="sidebar-content">
+
+                <div class="app-brand">
+                    <div class="app-brand-title">
+                        MUSIC VISUALIZER
+                    </div>
+
+                    <div class="app-brand-subtitle">
+                        for Spotify
+                    </div>
+
+                    <div class="app-brand-note">
+                        Private project · Created by Aliaksei Zaneuski
+                    </div>
+                </div>
 
                 <button class="fullscreen-button icon-button" id="fullscreen-button" type="button"
                     aria-label="Enter fullscreen">
@@ -80,18 +214,26 @@
 
                 <button class="display-mode-button icon-button" id="display-mode-button" type="button"
                     aria-label="Switch display mode">
-                    <i data-lucide="panel-right-close"></i>
+                    <i data-lucide="music-2"></i>
                     <span>Lyrics mode</span>
                 </button>
 
                 <button class="spotify-login icon-button" id="spotify-login" type="button">
                     <i data-lucide="music"></i>
-                    <span>Connect Spotify</span>
+                    <span>
+                        Connect
+                        <img src="docs/Spotify.png" alt="" class="spotify-logo">
+                        Spotify
+                    </span>
                 </button>
 
                 <button class="spotify-logout icon-button" id="spotify-logout" type="button">
                     <i data-lucide="log-out"></i>
-                    <span>Disconnect Spotify</span>
+                    <span>
+                        Disconnect
+                        <img src="docs/Spotify.png" alt="" class="spotify-logo">
+                        Spotify
+                    </span>
                 </button>
 
                 <div class="background-section">

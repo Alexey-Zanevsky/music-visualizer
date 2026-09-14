@@ -91,7 +91,126 @@ button {
     opacity: 1;
 }
 
-/* ----- */
+/* Welcome Screen */
+
+.welcome-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--stage-padding);
+    text-align: center;
+}
+
+.visualizer.spotify-connected .welcome-screen {
+    display: none;
+}
+
+.welcome-content {
+    width: min(620px, 90vw);
+}
+
+.welcome-title {
+    font-family: "Poetsen One", sans-serif;
+    font-size: clamp(32px, 5vw, 58px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.welcome-subtitle {
+    margin-top: 8px;
+    color: #1DB954;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 600;
+}
+
+.welcome-description {
+    margin: 28px 0 24px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 15px;
+}
+
+.setup-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+}
+
+.setup-step {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.045);
+    backdrop-filter: blur(12px);
+}
+
+.setup-step-number {
+    color: #1DB954;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding-top: 2px;
+}
+
+.setup-step strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.setup-step p {
+    margin: 4px 0 0;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.setup-step a {
+    color: #1DB954;
+    text-decoration: underline;
+}
+
+.setup-step code {
+    color: rgba(255, 255, 255, 0.72);
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.welcome-connect {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 22px;
+    padding: 11px 18px;
+    border: 1px solid rgba(29, 185, 84, 0.45);
+    border-radius: 10px;
+    background: rgba(29, 185, 84, 0.12);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease;
+}
+
+.welcome-connect:hover {
+    background: rgba(29, 185, 84, 0.20);
+    border-color: rgba(29, 185, 84, 0.7);
+}
+
+.welcome-connect .spotify-logo {
+    width: auto;
+    height: 18px;
+}
+
+/* Content */
 
 .content {
     position: relative;
@@ -101,9 +220,51 @@ button {
     width: 100%;
     height: calc(100% - var(--bars-height));
     margin: 0;
+    gap: var(--stage-padding);
     padding: var(--stage-padding);
     transition: opacity 450ms ease, transform 450ms ease;
+    will-change: transform, opacity;
 }
+
+.visualizer:not(.spotify-connected) .content {
+    display: none;
+}
+
+.visualizer.changing .content {
+    animation: content-slide-out 450ms cubic-bezier(0.7, 0, 0.9, 0.3) forwards;
+    pointer-events: none;
+}
+
+.content.track-entering {
+    animation: content-slide-in 450ms cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    pointer-events: none;
+}
+
+@keyframes content-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(18vw);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes content-slide-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-18vw);
+    }
+}
+
+/* Track Side Information */
 
 .track-side {
     display: flex;
@@ -210,6 +371,8 @@ button {
     color: rgba(255, 255, 255, 0.56);
 }
 
+/* Lyrics */
+
 .lyrics-side {
     position: relative;
     min-width: 0;
@@ -234,24 +397,24 @@ button {
 }
 
 .lyrics-window {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     width: 100%;
-    height: 100%;
-    transform: translateY(0);
     transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lyric-line {
     display: flex;
     align-items: center;
+    flex: 0 0 auto;
+    height: calc((100vh - var(--bars-height)) / 3);
+    min-height: 80px;
     width: 100%;
-    min-height: 33.333%;
     margin: 0;
-    padding-right: min(1.6vw, 28px);
-    color: rgba(255, 255, 255, 0.48);
+    color: rgba(255, 255, 255, 0.56);
     font-size: min(4vw, 8.2vh);
     line-height: 1.08;
     font-weight: 700;
@@ -290,6 +453,12 @@ button {
     height: 100%;
 }
 
+@property --countdown-progress {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
 .lyrics-countdown {
     --countdown-progress: 0deg;
     position: relative;
@@ -298,10 +467,29 @@ button {
     width: min(13vw, 20vh);
     aspect-ratio: 1;
     border-radius: 50%;
+
+    --countdown-progress: 0deg;
+
     background:
-        conic-gradient(#1db954 var(--countdown-progress), rgba(255, 255, 255, 0.18) 0deg),
+        conic-gradient(#1db954 var(--countdown-progress),
+            rgba(255, 255, 255, 0.18) 0deg),
         rgba(255, 255, 255, 0.08);
-    box-shadow: 0 18px 70px rgba(0, 0, 0, 0.32);
+
+    box-shadow:
+        inset 0 0 14px rgba(29, 185, 84, 0.35),
+        inset 0 0 28px rgba(29, 185, 84, 0.15);
+
+    animation: countdown-progress 10s linear forwards;
+}
+
+@keyframes countdown-progress {
+    from {
+        --countdown-progress: 0deg;
+    }
+
+    to {
+        --countdown-progress: 360deg;
+    }
 }
 
 .lyrics-countdown::before {
@@ -322,6 +510,8 @@ button {
     font-weight: 800;
     letter-spacing: 0;
 }
+
+/* Bottom Bars */
 
 .bars {
     position: absolute;
@@ -366,10 +556,7 @@ button {
     opacity: 0.72;
 }
 
-.visualizer.changing .content {
-    opacity: 0.35;
-    transform: scale(0.985);
-}
+/* Sidebar */
 
 .sidebar-trigger {
     position: absolute;
@@ -377,7 +564,21 @@ button {
     bottom: 0;
     left: 0;
     z-index: 28;
-    width: 22px;
+    width: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.sidebar-trigger::after {
+    content: "";
+    width: 2px;
+    height: 5vh;
+    margin-left: 2px;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.28);
 }
 
 .sidebar {
@@ -423,6 +624,102 @@ button {
     gap: 10px;
 }
 
+.app-brand {
+    padding: 4px 4px 22px;
+}
+
+.app-brand-title {
+    font-family: "Poetsen One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    line-height: 1.1;
+}
+
+.app-brand-subtitle {
+    margin-top: 3px;
+    font-size: 15px;
+    color: #1DB954;
+    font-weight: 600;
+}
+
+.welcome-note,
+.app-brand-note {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+
+.standard-preview {
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 30% 30%, #555, transparent 45%),
+        radial-gradient(circle at 70% 70%, #222, #080808);
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+    font-weight: 700;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.fullscreen-button.is-active {
+    background: #1db954;
+    color: #fff;
+}
+
+.display-mode-button.is-active {
+    color: #062015;
+}
+
+.icon-button svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    stroke-width: 2.2;
+}
+
+.icon-button span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.spotify-login[hidden],
+.spotify-logout[hidden] {
+    display: none;
+}
+
+.spotify-login span,
+.spotify-logout span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.spotify-logo {
+    width: auto;
+    height: 18px;
+    margin-left: 5px;
+    object-fit: contain;
+    display: block;
+}
+
 .background-section {
     margin-top: 14px;
 }
@@ -430,7 +727,7 @@ button {
 .background-section-title {
     margin-bottom: 10px;
     color: rgba(255, 255, 255, 0.62);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -480,7 +777,7 @@ button {
     left: 8px;
     z-index: 2;
     color: #fff;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     text-align: left;
     text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
@@ -488,60 +785,6 @@ button {
 
 .background-card.active {
     border-color: #1db954;
-}
-
-.standard-preview {
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(circle at 30% 30%, #555, transparent 45%),
-        radial-gradient(circle at 70% 70%, #222, #080808);
-}
-
-/* ---- */
-
-.icon-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    width: 100%;
-    min-height: 44px;
-    padding: 12px 14px;
-    border: 0;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.92);
-    color: #111;
-    font-weight: 700;
-    letter-spacing: 0;
-    cursor: pointer;
-}
-
-.fullscreen-button.is-active {
-    background: #1db954;
-    color: #fff;
-}
-
-.display-mode-button.is-active {
-    color: #062015;
-}
-
-.icon-button svg {
-    width: 20px;
-    height: 20px;
-    flex: 0 0 auto;
-    stroke-width: 2.2;
-}
-
-.icon-button span {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.spotify-login[hidden],
-.spotify-logout[hidden] {
-    display: none;
 }
 
 @keyframes background-rotate {
@@ -596,6 +839,7 @@ button {
         transform-origin: center center;
         padding-right: 0;
         font-size: min(6vw, 6.8vh);
+        height: calc((100vh - var(--bars-height)) / 5);
     }
 
     .lyrics-countdown {
